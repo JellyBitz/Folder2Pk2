@@ -17,7 +17,7 @@ namespace SRO.PK2
         /// <summary>
         /// Offset from file data on stream.
         /// </summary>
-        public int Offset { get; }
+        public long Offset { get; }
         /// <summary>
         /// File data size.
         /// </summary>
@@ -25,7 +25,7 @@ namespace SRO.PK2
         #endregion
 
         #region Constructor
-        public Pk2File(string name, Pk2Folder parent, FileStream filestream, int offset, uint size)
+        public Pk2File(string name, Pk2Folder parent, FileStream filestream, long offset, uint size)
         {
             Name = name;
             Parent = parent;

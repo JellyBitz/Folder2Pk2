@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 
 namespace Folder2Pk2
 {
@@ -19,7 +20,7 @@ namespace Folder2Pk2
         /// </summary>
         private static void Main(string[] args)
         {
-            Console.Title = "Folder2Pk2 - https://github.com/JellyBitz/Folder2Pk2";
+            Console.Title = "Folder2Pk2 v"+ FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion + " - https://github.com/JellyBitz/Folder2Pk2";
             Console.WriteLine(Console.Title + Environment.NewLine);
 
             LoadCommandLine(args);

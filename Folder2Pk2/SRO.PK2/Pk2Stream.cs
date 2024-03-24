@@ -171,7 +171,7 @@ namespace SRO.PK2
             var file = GetFile(path);
             if (file != null)
             {
-                int fileOffset;
+                long fileOffset;
                 // Find and update size allocation
                 if (bytes.Length <= file.Size)
                 {
@@ -180,7 +180,7 @@ namespace SRO.PK2
                 else
                 {
                     mDiskAllocations.Remove(file.Offset);
-                    fileOffset = (int)AllocateSpace(bytes.Length);
+                    fileOffset = AllocateSpace(bytes.Length);
                 }
                 // Find and update block entry
                 long blockOffset = file.Parent.Offset;
@@ -389,7 +389,7 @@ namespace SRO.PK2
                         if (entry.Name == "." || entry.Name == "..")
                             break;
                         // Add new folder to parent
-                        var newFolder = new Pk2Folder(entry.Name, parent, (int)entry.Offset);
+                        var newFolder = new Pk2Folder(entry.Name, parent, entry.Offset);
                         parent.Folders.Add(entry.Name.ToLowerInvariant(), newFolder);
                         // Keep full path for a quick search
                         mFolders.Add(newFolder.GetFullPath(), newFolder);
@@ -398,7 +398,7 @@ namespace SRO.PK2
                         break;
                     case PackFileEntryType.File:
                         // Add new file to parent
-                        var newFile = new Pk2File(entry.Name, parent, mFileStream, (int)entry.Offset, entry.Size);
+                        var newFile = new Pk2File(entry.Name, parent, mFileStream, entry.Offset, entry.Size);
                         parent.Files.Add(entry.Name.ToLowerInvariant(), newFile);
                         // Keep full path for a quick search
                         mFiles.Add(newFile.GetFullPath(), newFile);
