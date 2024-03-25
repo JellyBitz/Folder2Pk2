@@ -184,7 +184,7 @@ namespace SRO.PK2
                 }
                 // Find and update block entry
                 long blockOffset = file.Parent.Offset;
-                while (true)
+                while (blockOffset != 0)
                 {
                     var block = LoadPackFileBlock(blockOffset);
                     for (int i = 0; i < block.Entries.Length; i++)
@@ -212,6 +212,8 @@ namespace SRO.PK2
                     // Continue reading chain until find it
                     blockOffset = block.Entries.Last().NextBlock;
                 }
+                // Entry was not able to be found
+                return false;
             }
             else
             {
@@ -222,7 +224,7 @@ namespace SRO.PK2
                 var folder = GetFolder(folderName);
                 // Load and update block with the new file
                 long blockOffset = folder.Offset;
-                while (true)
+                while (blockOffset != 0)
                 {
                     var block = LoadPackFileBlock(blockOffset);
                     for (int i = 0; i < block.Entries.Length; i++)
@@ -254,6 +256,8 @@ namespace SRO.PK2
                     // Expand chain if necessary
                     blockOffset = nextBlock == 0 ? ExpandPackFileBlock(blockOffset, block) : nextBlock;
                 }
+                // Entry was not able to be found
+                return false;
             }
         }
         /// <summary>
@@ -273,7 +277,7 @@ namespace SRO.PK2
             RemoveFolderLinks(folder);
             // Remove entry from parent block only so it breaks all the sub blocks
             var blockOffset = folder.Parent.Offset;
-            while (true)
+            while (blockOffset != 0)
             {
                 var block = LoadPackFileBlock(blockOffset);
                 for (int i = 0; i < block.Entries.Length; i++)
@@ -293,6 +297,8 @@ namespace SRO.PK2
                 // Continue reading chain until find it
                 blockOffset = block.Entries.Last().NextBlock;
             }
+            // Entry was not able to be found
+            return false;
         }
         /// <summary>
         /// Removes a file.
@@ -309,7 +315,7 @@ namespace SRO.PK2
 
             // Load and update block which contains the entry to this file
             var blockOffset = file.Parent.Offset;
-            while (true)
+            while (blockOffset != 0)
             {
                 var block = LoadPackFileBlock(blockOffset);
                 for (int i = 0; i < block.Entries.Length; i++)
@@ -331,6 +337,8 @@ namespace SRO.PK2
                 // Continue reading chain until find it
                 blockOffset = block.Entries.Last().NextBlock;
             }
+            // Entry was not able to be found
+            return false;
         }
         /// <summary>
         /// Close the stream and free the resources.
