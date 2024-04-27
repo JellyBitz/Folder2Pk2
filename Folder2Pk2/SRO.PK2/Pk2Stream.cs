@@ -19,7 +19,7 @@ namespace SRO.PK2
         private PackFileHeader mHeader;
         private Dictionary<string, Pk2Folder> mFolders = new Dictionary<string, Pk2Folder>();
         private Dictionary<string, Pk2File> mFiles = new Dictionary<string, Pk2File>();
-        private Dictionary<long, long> mDiskAllocations = new Dictionary<long, long>();
+        private SortedDictionary<long, long> mDiskAllocations = new SortedDictionary<long, long>();
         #endregion
 
         #region Constructor
@@ -467,7 +467,6 @@ namespace SRO.PK2
         {
             // Sort all offsets
             var offsets = mDiskAllocations.Keys.ToList();
-            offsets.Sort();
             for (int i = 0; i < offsets.Count; i++)
             {
                 var allocationSize = mDiskAllocations[offsets[i]];
@@ -475,7 +474,7 @@ namespace SRO.PK2
                 if (!mDiskAllocations.TryGetValue(nextAllocation, out _))
                 {
                     // Check space available between this allocation and the next one
-                    var availableSize = i + 1 == offsets.Count ? mFileStream.Length - nextAllocation : mDiskAllocations[offsets[i + 1]] - allocationSize;
+                    long availableSize = i + 1 == offsets.Count ? mFileStream.Length - nextAllocation : offsets[i + 1] - (offsets[i] + allocationSize);
                     if (availableSize >= Size)
                         return nextAllocation;
                 }
