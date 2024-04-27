@@ -57,6 +57,8 @@ namespace SRO.PK2
             // Prepare to read the file
             mFileStream.Seek(0, SeekOrigin.Begin);
             mHeader = mFileStream.Read<PackFileHeader>();
+            // Track header allocation
+            mDiskAllocations[0] = Marshal.SizeOf(typeof(PackFileHeader));
 
             // Check if the key provided is the right one by comparing the checksum
             var checksum = mBlowfish.Encode(Encoding.UTF8.GetBytes("Joymax Pack File"));
@@ -71,6 +73,8 @@ namespace SRO.PK2
             // Try to read all the blocks
             try
             {
+                // Track default block
+                mDiskAllocations[root.Offset] = Marshal.SizeOf(typeof(PackFileBlock));
                 InitializeStreamBlock(root.Offset, root);
             }
             catch (Exception ex)
@@ -78,13 +82,6 @@ namespace SRO.PK2
                 // The only reason to fail is a wrong blowfish key or differents Pk2 structures
                 throw new IOException("Error reading PK2 file!", ex);
             }
-
-            // Mapping disk allocations so it gets easier to track empty spots
-            mDiskAllocations[0] = Marshal.SizeOf(typeof(PackFileHeader));
-            foreach (var kv in mFolders)
-                mDiskAllocations[kv.Value.Offset] = Marshal.SizeOf(typeof(PackFileBlock));
-            foreach (var kv in mFiles)
-                mDiskAllocations[kv.Value.Offset] = kv.Value.Size;
         }
         #endregion
 
@@ -401,6 +398,8 @@ namespace SRO.PK2
                         parent.Folders.Add(entry.Name.ToLowerInvariant(), newFolder);
                         // Keep full path for a quick search
                         mFolders.Add(newFolder.GetFullPath(), newFolder);
+                        // Track folder allocation
+                        mDiskAllocations[entry.Offset] = Marshal.SizeOf(typeof(PackFileBlock));
                         // Continue reading folder
                         InitializeStreamBlock(entry.Offset, newFolder);
                         break;
@@ -410,13 +409,19 @@ namespace SRO.PK2
                         parent.Files.Add(entry.Name.ToLowerInvariant(), newFile);
                         // Keep full path for a quick search
                         mFiles.Add(newFile.GetFullPath(), newFile);
+                        // Track file allocation
+                        mDiskAllocations[entry.Offset] = entry.Size;
                         break;
                 }
             }
             // Read next block from chain
             var nextBlock = block.Entries.Last().NextBlock;
             if (nextBlock != 0)
+            {
                 InitializeStreamBlock(nextBlock, parent);
+                // Track folder chain allocation
+                mDiskAllocations[nextBlock] = Marshal.SizeOf(typeof(PackFileBlock));
+            }
         }
         /// <summary>
         /// Load and decode the PackFileBlock from offset
@@ -474,7 +479,7 @@ namespace SRO.PK2
                 if (!mDiskAllocations.TryGetValue(nextAllocation, out _))
                 {
                     // Check space available between this allocation and the next one
-                    long availableSize = i + 1 == offsets.Count ? mFileStream.Length - nextAllocation : offsets[i + 1] - (offsets[i] + allocationSize);
+                    long availableSize = i + 1 == offsets.Count ? mFileStream.Length - nextAllocation : offsets[i + 1] - nextAllocation;
                     if (availableSize >= Size)
                         return nextAllocation;
                 }
