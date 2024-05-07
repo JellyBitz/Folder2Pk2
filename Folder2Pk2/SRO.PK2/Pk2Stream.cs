@@ -193,6 +193,7 @@ namespace SRO.PK2
                             // Write/Overwrite file data & track it
                             mFileStream.Seek(newFile.Offset, SeekOrigin.Begin);
                             mFileStream.Write(bytes, 0, bytes.Length);
+                            mFileStream.Flush();
                             mDiskAllocations[newFile.Offset] = newFile.Size;
                             // Update entry
                             var timeNow = DateTime.Now;
@@ -232,6 +233,7 @@ namespace SRO.PK2
                             // Write file data & track it
                             mFileStream.Seek(newFile.Offset, SeekOrigin.Begin);
                             mFileStream.Write(bytes, 0, bytes.Length);
+                            mFileStream.Flush();
                             mDiskAllocations[newFile.Offset] = newFile.Size;
                             // Update entry
                             block.Entries[i].Type = PackFileEntryType.File;
@@ -354,6 +356,7 @@ namespace SRO.PK2
             var checksum = mBlowfish.Encode(Encoding.UTF8.GetBytes("Joymax Pack File"));
             Array.Copy(checksum, header.Checksum, 3);
             mFileStream.Write(header);
+            mFileStream.Flush();
             // Setup block chain from root folder
             var offset = Marshal.SizeOf(typeof(PackFileHeader));
             PackFileBlock block = new PackFileBlock { Entries = new PackFileEntry[20] };
@@ -375,6 +378,7 @@ namespace SRO.PK2
             // Fill left bytes to match chunk size (4096)
             var bytes = new byte[4096 - mFileStream.Length];
             mFileStream.Write(bytes, 0, bytes.Length);
+            mFileStream.Flush();
         }
         /// <summary>
         /// Initialize the block chains reading the minimal information to use the stream.
@@ -444,6 +448,7 @@ namespace SRO.PK2
             bytes = mBlowfish.Encode(bytes);
             mFileStream.Seek(offset, SeekOrigin.Begin);
             mFileStream.Write(bytes, 0, bytes.Length);
+            mFileStream.Flush();
         }
         /// <summary>
         /// Creates a new block on the block chain given.
@@ -491,6 +496,7 @@ namespace SRO.PK2
             mFileStream.Seek(0, SeekOrigin.End);
             var pos = mFileStream.Length;
             mFileStream.Write(bytes, 0, bytes.Length);
+            mFileStream.Flush();
             return pos;
         }
         private void CreateFolderBlock(long offset, Pk2Folder parentFolder, List<string> paths)
