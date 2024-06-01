@@ -229,7 +229,7 @@ namespace SRO.PK2
                     {
                         if (block.Entries[i].Type == PackFileEntryType.Empty)
                         {
-                            var newFile = new Pk2File(Path.GetFileName(path), folder, mFileStream, (int)AllocateSpace(bytes.Length), (uint)bytes.Length);
+                            var newFile = new Pk2File(Path.GetFileName(path), folder, mFileStream, AllocateSpace(bytes.Length), (uint)bytes.Length);
                             // Write file data & track it
                             mFileStream.Seek(newFile.Offset, SeekOrigin.Begin);
                             mFileStream.Write(bytes, 0, bytes.Length);
